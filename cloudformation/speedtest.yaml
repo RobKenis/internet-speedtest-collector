@@ -1,0 +1,32 @@
+Description: 'ECR and resources to collect SpeedTest metrics.'
+Resources:
+  SpeedTestUser:
+    Type: AWS::IAM::User
+    Properties:
+      UserName: 'speedtest-collector'
+      Policies:
+        - PolicyName: PullECR
+          PolicyDocument:
+            Version: '2012-10-17'
+            Statement:
+              - Effect: Allow
+                Action:
+                  - 'ecr:GetAuthorizationToken'
+                Resource:
+                  - '*'
+  Repository:
+    Type: AWS::ECR::Repository
+    Properties:
+      RepositoryName: "robkenis/speedtest"
+      RepositoryPolicyText:
+        Version: "2012-10-17"
+        Statement:
+          - Sid: AllowPull
+            Effect: Allow
+            Principal:
+              AWS:
+                - !GetAtt SpeedTestUser.Arn
+            Action:
+              - "ecr:GetDownloadUrlForLayer"
+              - "ecr:BatchGetImage"
+              - "ecr:BatchCheckLayerAvailability"
