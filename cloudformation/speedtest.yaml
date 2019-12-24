@@ -1,4 +1,5 @@
 Description: 'ECR and resources to collect SpeedTest metrics.'
+Transform: AWS::Serverless-2016-10-31
 Resources:
   SpeedTestUser:
     Type: AWS::IAM::User
@@ -14,6 +15,15 @@ Resources:
                   - 'ecr:GetAuthorizationToken'
                 Resource:
                   - '*'
+        - PolicyName: PutMetrics
+          PolicyDocument:
+            Version: '2012-10-17'
+            Statement:
+              - Effect: Allow
+                Action:
+                  - 'dynamodb:PutItem'
+                Resource:
+                  - !GetAtt MetricsTable.Arn
   Repository:
     Type: AWS::ECR::Repository
     Properties:
@@ -30,3 +40,10 @@ Resources:
               - "ecr:GetDownloadUrlForLayer"
               - "ecr:BatchGetImage"
               - "ecr:BatchCheckLayerAvailability"
+  MetricsTable:
+    Type: AWS::Serverless::SimpleTable
+    Properties:
+      PrimaryKey:
+        Name: timestamp
+        Type: String
+
